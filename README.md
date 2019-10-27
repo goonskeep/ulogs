@@ -8,9 +8,9 @@
 ```
 ### About
 
-The steam addon for ulogs went dark, and the version of ulogs associated w/ that steam addon seems to no longer exist. Ether it was deleted or the github user changed their name, whichever.
+The steam addon for ulogs went dark, and the version of ulogs on github associated with that steam addon seems to no longer exist. 
 
-This fork currently has no changes from the [years old upstream](https://github.com/100acrebb/ulogs) but will be refactored/maintained in the future.
+Ether it was deleted or the github user changed their name, whichever, this addon is still in use on our server and still needs to be maintained.
 
 ### Installation
 
