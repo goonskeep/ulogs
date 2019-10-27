@@ -85,7 +85,7 @@ function PANEL:UpdateColours( skin )
 	if self.Depressed or self.m_bSelected then
 		return self:SetTextStyleColor( Color( 255, 255, 255 ) )
 	elseif self.Hovered then
-		return self:SetTextStyleColor( Color( 0, 0, 0 ) )
+		return self:SetTextStyleColor( Color( 255, 255, 255 ) )
 	else
 		return self:SetTextStyleColor( Color( 255, 0, 0 ) )
 	end

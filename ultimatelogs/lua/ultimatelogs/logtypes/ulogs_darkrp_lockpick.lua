@@ -16,17 +16,17 @@
 
 
 
-local INDEX = 8
-local GM = 1
+local INDEX = 26
+local GM = 2
 
-ULogs.AddLogType( INDEX, GM, "Toolgun", function( Tool, Player )
+ULogs.AddLogType( INDEX, GM, "Lockpick", function( Player, Entity )
 	
-	if !Tool then return end
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return end
+	if !Entity or !Entity:IsValid() then return end
 	
 	local Informations = {}
 	local Base = ULogs.RegisterBase( Player )
-	table.insert( Informations, { "Copy tool", Tool } )
+	table.insert( Informations, { "Copy entity class", Entity:GetClass() } )
 	local Data = {}
 	Data[ 1 ] = Player:Name()
 	Data[ 2 ] = {}
@@ -37,18 +37,17 @@ ULogs.AddLogType( INDEX, GM, "Toolgun", function( Tool, Player )
 	
 end)
 
-hook.Add( "CanTool", "ULogs_CanTool", function( Player, _, Tool )
+hook.Add( "onLockpickCompleted", "ULogs_onLockpickCompleted", function( Player, Success, Entity )
 	
 	if !SERVER then return end
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return end
-	if !Tool then return end
+	if type( Success ) != "boolean" then return end
+	if !Entity or !Entity:IsValid() then return end
+	local SuccessString = "no"
+	if Success then SuccessString = "yes" end -- I don't know why the other method didn't work so I do it with a statement here
 	
-	if !table.HasValue( ULogs.config.IgnoreTools, Tool ) then
-		
-		ULogs.AddLog( INDEX, ULogs.PlayerInfo( Player ) .. " used '" .. Tool .. "'",
-			ULogs.Register( INDEX, Tool, Player ) )
-		
-	end
+	ULogs.AddLog( INDEX, ULogs.PlayerInfo( Player ) .. " lockpicked '" .. Entity:GetClass() .. "'. Success : '" .. SuccessString .. "'",
+		ULogs.Register( INDEX, Player, Entity ) )
 	
 end)
 

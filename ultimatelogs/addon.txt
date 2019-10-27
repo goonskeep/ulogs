@@ -2,7 +2,7 @@
 {
 	"name"				"UltimateLogs"
 	"version"			"1"
-	"up_date"			"24/12/2015"
+	"up_date"			"29/04/2017"
 	"author_name"			"Myrage2000"
 	"author_email"			""
 	"author_url"			"https://github.com/myrage2000/ulogs"

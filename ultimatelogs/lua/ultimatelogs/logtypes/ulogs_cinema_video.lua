@@ -16,17 +16,17 @@
 
 
 
-local INDEX = 8
-local GM = 1
+local INDEX = 29
+local GM = 6
 
-ULogs.AddLogType( INDEX, GM, "Toolgun", function( Tool, Player )
+ULogs.AddLogType( INDEX, GM, "Videos", function( Player, Url )
 	
-	if !Tool then return end
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return end
+	if !Url then return end
 	
 	local Informations = {}
 	local Base = ULogs.RegisterBase( Player )
-	table.insert( Informations, { "Copy tool", Tool } )
+	table.insert( Informations, { "Copy URL", Url } )
 	local Data = {}
 	Data[ 1 ] = Player:Name()
 	Data[ 2 ] = {}
@@ -37,19 +37,16 @@ ULogs.AddLogType( INDEX, GM, "Toolgun", function( Tool, Player )
 	
 end)
 
-hook.Add( "CanTool", "ULogs_CanTool", function( Player, _, Tool )
-	
+hook.Add( "PostVideoQueued", "ULogs_PostVideoQueued", function(Video, Theater)
+
 	if !SERVER then return end
+	local Player = Video:GetOwner()
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return end
-	if !Tool then return end
 	
-	if !table.HasValue( ULogs.config.IgnoreTools, Tool ) then
-		
-		ULogs.AddLog( INDEX, ULogs.PlayerInfo( Player ) .. " used '" .. Tool .. "'",
-			ULogs.Register( INDEX, Tool, Player ) )
-		
-	end
+	local Title = SQLStr(Video:Title())
 	
+	ULogs.AddLog( INDEX, ULogs.PlayerInfo( Player ) .. " queued ".. Title, 
+		ULogs.Register( INDEX, Player, Video:Data() ) )
 end)
 
 

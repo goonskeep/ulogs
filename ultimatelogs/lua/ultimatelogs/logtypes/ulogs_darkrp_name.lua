@@ -16,17 +16,15 @@
 
 
 
-local INDEX = 8
-local GM = 1
+local INDEX = 12
+local GM = 2
 
-ULogs.AddLogType( INDEX, GM, "Toolgun", function( Tool, Player )
+ULogs.AddLogType( INDEX, GM, "Name", function( Player )
 	
-	if !Tool then return end
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return end
 	
 	local Informations = {}
 	local Base = ULogs.RegisterBase( Player )
-	table.insert( Informations, { "Copy tool", Tool } )
 	local Data = {}
 	Data[ 1 ] = Player:Name()
 	Data[ 2 ] = {}
@@ -37,18 +35,15 @@ ULogs.AddLogType( INDEX, GM, "Toolgun", function( Tool, Player )
 	
 end)
 
-hook.Add( "CanTool", "ULogs_CanTool", function( Player, _, Tool )
+hook.Add( "onPlayerChangedName", "ULogs_onPlayerChangedName", function( Player, OldName, NewName )
 	
 	if !SERVER then return end
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return end
-	if !Tool then return end
+	if !OldName then return end
+	if !NewName then return end
 	
-	if !table.HasValue( ULogs.config.IgnoreTools, Tool ) then
-		
-		ULogs.AddLog( INDEX, ULogs.PlayerInfo( Player ) .. " used '" .. Tool .. "'",
-			ULogs.Register( INDEX, Tool, Player ) )
-		
-	end
+	ULogs.AddLog( INDEX, ULogs.PlayerInfo( Player ) .. " changed his name from '" .. OldName .. "' to '" .. NewName .. "'",
+		ULogs.Register( INDEX, Player ) )
 	
 end)
 

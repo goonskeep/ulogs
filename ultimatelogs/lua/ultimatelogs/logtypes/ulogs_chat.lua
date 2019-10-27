@@ -39,11 +39,11 @@ end)
 
 hook.Add( "PlayerSay", "ULogs_PlayerSay", function( Player, Message, Team )
 	
-	if !Player or !Player:IsValid() or !Player:IsPlayer() then return end
-	if !Message then return end
+	if !Player or !Player:IsValid() or !Player:IsPlayer() then return "" end
+	if !Message then return "" end
 	local Log = true
 	if !ULogs.config.LogChatCommand and ( string.sub( string.lower( Message ), 1, string.len( ULogs.config.ChatCommand ) ) == ULogs.config.ChatCommand ) then
-		return
+		return ""
 	end
 	local Prefix = ""
 	if Team then Prefix = "TEAM Chat : " end
