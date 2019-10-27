@@ -23,8 +23,7 @@ ULogs.config = {}                                      -- Please don't edit this
 
 ULogs.config.Title          = "Ultimate Logs"          -- The addon name
 
-if (THABID == nil) then THABID = "unknown" end
-ULogs.config.TableName      = "ulogs_" .. THABID                 -- The database table name
+ULogs.config.TableName      = "ulogs"                  -- The database table name
 
 ULogs.config.Lines          = 32                       -- Set how many lines are visible per page
 
@@ -38,27 +37,20 @@ ULogs.config.MaxLoadTime    = 5                        -- After how many seconds
 ULogs.config.CanSee         = {                        -- ULX ranks that can open the logs menu
 
 "superadmin",
-"headadmin",
-"senioradmin",
 "admin",
-"operator",
-"moderator",
-}
-
-ULogs.config.SeeIP          = {                        -- ULX ranks that can see IP addresses
-
-"superadmin",
-"headadmin",
-"senioradmin",
-"admin",
-
 
 }
 
-ULogs.config.Delete         = {                        -- ULX ranks that can delete logs
+ULogs.config.CanSeeIP          = {                     -- ULX ranks that can see IP addresses of other players
 
 "superadmin",
-"headadmin",
+
+}
+
+ULogs.config.CanDelete         = {                     -- ULX ranks that can delete logs
+
+"superadmin",
+
 }
 
 ULogs.config.IgnoreCommands = {                        -- Don't log these console commands
@@ -117,9 +109,18 @@ ULogs.config.IgnoreCommands = {                        -- Don't log these consol
 "billiard_strike",
 "wac_air_input",
 "slotm_spin",
+"_fadmin",
+"cinema_video_request",
+"cinema_fullscreen_freeze",
 
 
 ULogs.config.ConCommand -- Don't log the command to open the logs menu. Please don't edit this line
+
+}
+
+ULogs.config.IgnoreTools = {                           -- Don't log these tools
+
+"colour",
 
 }
 
@@ -158,10 +159,17 @@ ULogs.config.Block = {                                 -- Don't touch this if yo
 -- 20,
 -- 21,
 -- 22,
+-- 23,
+-- 24,
+-- 25,
+-- 26,
+-- 27,
+-- 28,
+-- 29,
 
 }
 
-ULogs.config.SaveToData      = false                    -- Set to 'true' if you want to save a copy of the logs in the data folder
+ULogs.config.SaveToData      = true                    -- Set to 'true' if you want to save a copy of the logs in the data folder
                                                        -- In all cases the logs will be at least saved in the database
 
 
@@ -177,9 +185,9 @@ ULogs.config.SaveToData      = false                    -- Set to 'true' if you 
 
 
 ULogs.config.OnlyUseCustom  = false                      -- Set this to 'true' if you want to use
-                                                         -- custom function instead of ULX
+                                                         -- custom function instead of CAMI ranks
 
-ULogs.config.CanSeeCustom   = function( Player )         -- If ULX is not installed or if 'OnlyUseCustom'
+ULogs.config.CanSeeCustom   = function( Player )         -- If 'OnlyUseCustom'
                                                          -- is set to 'true' then call this function to
 														 -- check if a player can see the logs menu
 
@@ -188,16 +196,16 @@ return Player:IsSuperAdmin() or Player:IsAdmin()         -- By default if the pl
 
 end
 
-ULogs.config.SeeIPCustom    = function( Player )         -- If ULX is not installed or if 'OnlyUseCustom'
+ULogs.config.SeeIPCustom    = function( Player )         -- If 'OnlyUseCustom'
                                                          -- is set to 'true' then call this function to
 														 -- check if a player can see IP addresses
 
-return Player:IsSuperAdmin() or Player:IsAdmin()                             -- By default only superadmins can open see
+return Player:IsSuperAdmin()                             -- By default only superadmins can open see
 	                                                     -- IP addresses
 
 end
 
-ULogs.config.DeleteCustom   = function( Player )         -- If ULX is not installed or if 'OnlyUseCustom'
+ULogs.config.DeleteCustom   = function( Player )         -- If 'OnlyUseCustom'
                                                          -- is set to 'true' then call this function to
 														 -- check if a player can delete logs
 
