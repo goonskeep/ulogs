@@ -14,8 +14,8 @@ Ether it was deleted or the github user changed their name, whichever, this addo
 
 ### Installation
 
-Place into '*/GarrysMod/addons/'
+Place into `*/garrysmod/addons/`
 
 ### Configuration
 
-You can edit the configuration file under '*/GarrysMod/addons/ultimatelogs/lua/ultimatelogs/configuration.lua'
+You can edit the configuration file under `*/garrysmod/addons/ultimatelogs/lua/ultimatelogs/configuration.lua`
