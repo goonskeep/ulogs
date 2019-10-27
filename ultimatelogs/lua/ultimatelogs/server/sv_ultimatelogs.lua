@@ -17,7 +17,7 @@
 
 
 ULogs = ULogs or {}
-ULogs.Version = "1.04"
+ULogs.Version = "1.11"
 
 util.AddNetworkString( "ULogs_OpenMenu" )
 util.AddNetworkString( "ULogs_Notify" )
@@ -40,7 +40,7 @@ util.AddNetworkString( "ULogs_DeleteOldest" )
 
 ULogs.Initialize = function()
 	MySQLite.initialize( ULogs.MySQLite_config )
-	--ULogs.MySQLite_config = nil -- Because it will never be used after here
+	--ULogs.MySQLite_config = nil -- Because it will never be used after here, can prevent some leaks ?
 end
 ULogs.Initialize()
 
@@ -63,12 +63,13 @@ ULogs.GetDate = function()
 	
 end
 
-ULogs.IsIP = function( Str ) -- Bad function for the moment to check if a string contains a ip
+ULogs.IsIP = function( Str )
 	
 	if !Str then return end
 	Str = Str:lower()
 	
-	if string.match( Str, "ip" ) then return true end
+	-- Thanks MexicanRaindeer
+	if string.match( Str, "[12]?%d%d?%.[12]?%d%d?%.[12]?%d%d?%.[12]?%d%d?" ) or string.match( Str, "ip" ) then return true end
 	
 	return false
 	
@@ -173,15 +174,11 @@ ULogs.CheckLimit = function( CallBack )
 			
 			if lines > ULogs.config.Limit then
 				
-				
-				--ULogs.Query( "DELETE FROM " .. ULogs.config.TableName .. " ORDER BY id ASC LIMIT 100", function()
-				--	CallBack()
-				--	return
-				--end)
-				
-				ULogs.Query( "DELETE FROM " .. ULogs.config.TableName .. " WHERE id IN( SELECT id FROM " .. ULogs.config.TableName .. " ORDER BY id ASC LIMIT 10)", function()
+				ULogs.Query( "DELETE FROM " .. ULogs.config.TableName .. " WHERE id IN(SELECT id FROM (SELECT id FROM " .. ULogs.config.TableName .. " ORDER BY `id` ASC LIMIT 1) x)", function()
+			
 					CallBack()
 					return
+					
 				end)
 				
 			else
@@ -271,7 +268,7 @@ ULogs.CanSee = function( Player )
 	
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return false end
 	
-	if ULogs.config.OnlyUseCustom or type( Player.IsUserGroup ) != "function" then -- If OnlyUseCustom or if ULX is not installed
+	if ULogs.config.OnlyUseCustom then -- If OnlyUseCustom
 		
 		if ULogs.config.CanSeeCustom( Player ) then return true end
 		
@@ -279,17 +276,21 @@ ULogs.CanSee = function( Player )
 	
 	end
 	
-	for k, v in pairs( ULogs.config.CanSee ) do
+	if type( Player.IsUserGroup ) == "function" then -- Yeaaaah, ULX is installed !
 		
-		if Player:IsUserGroup( v ) then
+		for k, v in pairs( ULogs.config.CanSee ) do
 			
-			return true
+			if Player:IsUserGroup( v ) then
+				
+				return true
+				
+			end
 			
 		end
 		
 	end
 	
-	return false
+	return Player:IsAdmin()
 	
 end
 
@@ -297,25 +298,29 @@ ULogs.CanSeeIP = function( Player )
 	
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return false end
 	
-	if ULogs.config.OnlyUseCustom or type( Player.IsUserGroup ) != "function" then -- If OnlyUseCustom or if ULX is not installed
+	if ULogs.config.OnlyUseCustom then -- If OnlyUseCustom
 		
-		if ULogs.config.SeeIPCustom( Player ) then return true end
+		if ULogs.config.CanSeeCustom( Player ) then return true end
 		
 		return false
 	
 	end
 	
-	for k, v in pairs( ULogs.config.SeeIP ) do
+	if type( Player.IsUserGroup ) == "function" then -- Yeaaaah, ULX is installed !
 		
-		if Player:IsUserGroup( v ) then
+		for k, v in pairs( ULogs.config.CanSeeIP ) do
 			
-			return true
+			if Player:IsUserGroup( v ) then
+				
+				return true
+				
+			end
 			
 		end
 		
 	end
 	
-	return false
+	return Player:IsSuperAdmin()
 	
 end
 
@@ -323,25 +328,29 @@ ULogs.CanDelete = function( Player )
 	
 	if !Player or !Player:IsValid() or !Player:IsPlayer() then return false end
 	
-	if ULogs.config.OnlyUseCustom or type( Player.IsUserGroup ) != "function" then -- If OnlyUseCustom or if ULX is not installed
+	if ULogs.config.OnlyUseCustom then -- If OnlyUseCustom
 		
-		if ULogs.config.DeleteCustom( Player ) then return true end
+		if ULogs.config.CanSeeCustom( Player ) then return true end
 		
 		return false
 	
 	end
 	
-	for k, v in pairs( ULogs.config.Delete ) do
+	if type( Player.IsUserGroup ) == "function" then -- Yeaaaah, ULX is installed !
 		
-		if Player:IsUserGroup( v ) then
+		for k, v in pairs( ULogs.config.CanDelete ) do
 			
-			return true
+			if Player:IsUserGroup( v ) then
+				
+				return true
+				
+			end
 			
 		end
 		
 	end
 	
-	return false
+	return Player:IsSuperAdmin()
 	
 end
 
@@ -414,7 +423,7 @@ hook.Add( "PlayerSay", "ULogs_OpenPlayerSay", function( Player, Str ) -- Logs me
 	if string.sub( string.lower( Str ), 1, string.len( ULogs.config.ChatCommand ) ) == ULogs.config.ChatCommand then
 		
 		ULogs.OpenMenu( Player )
-		return false
+		return ""
 		
 	end
 	
@@ -569,13 +578,10 @@ net.Receive( "ULogs_DeleteOldest", function( _, Player )
 	
 	local Number = math.floor( tonumber( net.ReadString() ) )
 	
-
-	--ULogs.Query( "DELETE FROM " .. ULogs.config.TableName .. " ORDER BY id ASC LIMIT " .. Number , function()
-	--	ULogs.Notify( Player, "Successfully deleted logs !" )
-	--end)
-	
 	ULogs.Query( "DELETE FROM " .. ULogs.config.TableName .. " WHERE id IN( SELECT id FROM " .. ULogs.config.TableName .. " ORDER BY id ASC LIMIT " .. Number .. ")", function()
+		
 		ULogs.Notify( Player, "Successfully deleted logs !" )
+		
 	end)
 	
 end)

@@ -24,8 +24,10 @@ surface.CreateFont( "ULogs_Title",
 surface.CreateFont( "ULogs_Page",
 	{ font = "Arial", size = 16 } )
 
-ULogs.Block = {}
-ULogs.VersionAdvert = false
+local SearchDefaultText = "Search ALL Logs ..."
+
+ULogs.HideGM = {}
+ULogs.VersionAdvert = true
 
 
 
@@ -41,12 +43,9 @@ ULogs.VersionAdvert = false
 
 ULogs.GetOptions = function()
 	
-	local Data = LocalPlayer():GetPData( "ulogs_block", "[]" ) -- I don't like convars
-
-	if (type(Data) == "string") then
-		ULogs.Block = util.JSONToTable( Data )
-		ULogs.Block[ 1 ] = false
-	end
+	local OptionsData = tostring(LocalPlayer():GetPData( "ulogs_hidegamemode", "[]" )) or "" -- I don't like convars
+	
+	ULogs.HideGM = util.JSONToTable( OptionsData ) or {}
 	
 end
 
@@ -55,6 +54,7 @@ ULogs.Request = function( Mode, ID, Page, Option )
 	ULogs.RefreshCategory = true
 	
 	if !Mode or !ID or !Page then return end
+	if Option and string.Trim(Option) == SearchDefaultText then Mode = 1 Option = "" end
 	
 	net.Start( "ULogs_Request" )
 		net.WriteString( tostring( Mode ) )
@@ -320,7 +320,6 @@ ULogs.OpenMenu = function( Delete )
 		
 	end
 	
-	local SearchDefaultText = "Search ALL Logs ..."
 	local Search = vgui.Create( "ULogs_DTextEntry", Main )
 	Search:SetMultiline( false )
 	Search:SetPos( 3, Main:GetTall() - 28 )
@@ -328,12 +327,12 @@ ULogs.OpenMenu = function( Delete )
 	Search:SetText( SearchDefaultText )
 	Search:SetTextColor( Color( 255, 255, 255 ) )
 	Search.OnGetFocus = function()
-		if Search:GetValue() == SearchDefaultText then
+		if string.Trim(Search:GetValue()) == SearchDefaultText then
 			Search:SetText( "" )
 		end
 	end
 	Search.OnLoseFocus = function()
-		if Search:GetValue() == "" then
+		if string.Trim(Search:GetValue()) == "" then
 			Search:SetText( SearchDefaultText )
 		end
 	end
@@ -399,6 +398,7 @@ ULogs.OpenMenu = function( Delete )
 		local Option = nil
 		if Mode == 2 then Option = Search:GetValue() end
 		if Mode == 3 then Option = ChoosePlayer:GetValue() end
+		
 		ULogs.Request( Mode, SelectedButton, Page, Option )
 		
 	end
@@ -426,6 +426,10 @@ ULogs.OpenMenu = function( Delete )
 		if ULogs.RefreshCategory then
 			
 			ULogs.RefreshCategory = false
+			
+			if Mode == 2 and string.Trim(Search:GetValue()) == SearchDefaultText then
+				Mode = 1
+			end
 			
 			local Options = ""
 			if Mode == 2 then
@@ -544,8 +548,8 @@ ULogs.OpenMenu = function( Delete )
 	local LogTypes = {}
 	for k, v in pairs( ULogs.LogTypes ) do
 		
+		if ULogs.HideGM[ v.GM ] then continue end
 		if !LogTypes[ v.GM ] then LogTypes[ v.GM ] = {} end
-		if ULogs.Block[ v.ID ] then continue end
 		
 		table.insert( LogTypes[ v.GM ], v )
 		
@@ -805,24 +809,20 @@ ULogs.OpenOptionsMenu = function()
 	List:EnableVerticalScrollbar( true )
 	
 	local BlockOptions = {}
-	for k, v in pairs( ULogs.LogTypes ) do
+	for k, v in pairs( ULogs.GMTypes ) do
 		
-		if v.ID == 1 then continue end
+		--if v.ID == 1 then continue end
 		
 		local Button = vgui.Create( "ULogs_DCheckBoxLabel" )
-		local Info = ""
-		if ULogs.GMTypes[ v.GM ] and ULogs.GMTypes[ v.GM ].Name then
-			Info = ULogs.GMTypes[ v.GM ].Name .. " "
-		end
 		Button.ID = v.ID
-		Button:SetText( "Show " .. Info .. v.Name .. " logs" )
-		Button:SetValue( !ULogs.Block[ v.ID ] )
+		Button:SetText( "Show " .. v.Name .. " logs" )
+		Button:SetValue( !ULogs.HideGM[ v.ID ] )
 		Button.OnChange = function( self, Value )
 			
 			Value = !Value
-			ULogs.Block[ self.ID ] = tobool( Value )
-			local Data = util.TableToJSON( ULogs.Block )
-			LocalPlayer():SetPData( "ulogs_block", Data )
+			ULogs.HideGM[ self.ID ] = tobool( Value )
+			local Data = util.TableToJSON( ULogs.HideGM )
+			LocalPlayer():SetPData( "ulogs_hidegamemode", Data )
 			
 			ULogs.GetOptions()
 			

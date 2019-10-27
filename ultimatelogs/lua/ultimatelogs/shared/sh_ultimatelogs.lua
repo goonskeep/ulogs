@@ -17,8 +17,8 @@
 
 
 ULogs = ULogs or {}
-ULogs.LogTypes = {}
-ULogs.GMTypes = {}
+ULogs.LogTypes = ULogs.LogTypes or {}
+ULogs.GMTypes = ULogs.GMTypes or {}
 
 local Data = {}
 Data.ID = 1
